@@ -1,9 +1,10 @@
-const CACHE_NAME = 'cpp-dz-v1';
+const CACHE_NAME = 'cpp-dz-v2';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './laws.json',
+  './penal.json',
   './version.json'
 ];
 
