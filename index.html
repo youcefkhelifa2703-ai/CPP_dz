@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>قانون الإجراءات الجزائية الجزائري AI</title>
+  <title>الموسوعة الجزائية الجزائرية AI</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -26,7 +26,7 @@
       position: sticky; top: 0; z-index: 100;
       display: flex; justify-content: space-between; align-items: center;
     }
-    .logo h1 { font-size: 1.1rem; color: var(--gold); font-weight: 800; }
+    .logo h1 { font-size: 1.05rem; color: var(--gold); font-weight: 800; }
     .logo p { font-size: 0.75rem; color: var(--muted); }
     .status-badge {
       font-size: 0.72rem; padding: 4px 10px; border-radius: 20px;
@@ -37,29 +37,46 @@
       background: rgba(239, 68, 68, 0.15); color: var(--red); border-color: var(--red);
     }
     .container { max-width: 700px; margin: auto; padding: 16px; }
-    .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 14px; }
     .tab-btn {
       flex: 1; padding: 12px; border: none; border-radius: 12px;
       background: var(--card); color: var(--muted); font-weight: 700;
       font-size: 0.9rem; cursor: pointer; transition: 0.2s;
     }
     .tab-btn.active { background: var(--gold); color: #000; }
+    .filter-pills {
+      display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto;
+    }
+    .pill-btn {
+      flex: 1; padding: 8px 10px; border-radius: 10px;
+      border: 1px solid #334155; background: var(--card);
+      color: var(--muted); font-size: 0.8rem; font-weight: 700;
+      cursor: pointer; white-space: nowrap; transition: 0.2s;
+    }
+    .pill-btn.active {
+      border-color: var(--gold); color: var(--gold); background: rgba(245, 158, 11, 0.12);
+    }
     .search-box {
       width: 100%; padding: 14px; border-radius: 12px;
       border: 1px solid #334155; background: var(--card);
-      color: var(--text); font-size: 0.95rem; margin-bottom: 14px;
+      color: var(--text); font-size: 0.95rem; margin-bottom: 10px;
     }
     .search-box:focus { outline: none; border-color: var(--gold); }
+    .results-count {
+      font-size: 0.78rem; color: var(--muted); margin-bottom: 10px; text-align: left;
+    }
     .law-card {
       background: var(--card); border-radius: 14px; padding: 16px;
       margin-bottom: 12px; border-right: 4px solid var(--gold);
       box-shadow: 0 4px 6px rgba(0,0,0,0.2);
     }
-    .law-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .law-card.penal-card { border-right-color: #38bdf8; }
+    .law-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px; }
     .art-num { color: var(--gold); font-weight: 800; font-size: 1rem; }
-    .art-cat { font-size: 0.75rem; background: #334155; padding: 2px 8px; border-radius: 6px; }
+    .law-card.penal-card .art-num { color: #38bdf8; }
+    .art-cat { font-size: 0.72rem; background: #334155; padding: 2px 8px; border-radius: 6px; color: #e2e8f0; }
     .art-title { font-weight: 700; margin-bottom: 6px; font-size: 0.95rem; color: #e2e8f0; }
-    .art-text { font-size: 0.9rem; line-height: 1.7; color: #cbd5e1; }
+    .art-text { font-size: 0.9rem; line-height: 1.75; color: #cbd5e1; }
     
     .ai-box { display: none; }
     .ai-box.active { display: block; }
@@ -69,7 +86,7 @@
       min-height: 300px; max-height: 420px; overflow-y: auto;
       margin-bottom: 12px; border: 1px solid #334155;
     }
-    .msg { padding: 10px 14px; border-radius: 12px; margin-bottom: 10px; font-size: 0.9rem; line-height: 1.6; }
+    .msg { padding: 10px 14px; border-radius: 12px; margin-bottom: 10px; font-size: 0.9rem; line-height: 1.65; }
     .msg.bot { background: #0f172a; border-right: 3px solid var(--gold); }
     .msg.user { background: var(--gold); color: #000; font-weight: 600; margin-right: 20%; }
     .ai-input-group { display: flex; gap: 8px; }
@@ -91,7 +108,7 @@
 
 <header>
   <div class="logo">
-    <h1>⚖️ الإجراءات الجزائية DZ</h1>
+    <h1>⚖️ الإجراءات الجزائية والعقوبات DZ</h1>
     <p id="versionInfo">جاري التحقق من التحديثات...</p>
   </div>
   <div id="netStatus" class="status-badge">متصل • محدث</div>
@@ -106,26 +123,35 @@
   </div>
 
   <div id="lawsSection" class="laws-box">
-    <input type="text" id="searchInput" class="search-box" placeholder="ابحث برقم المادة أو الكلمة (مثال: توقيف، تلبس، تفتيش...)" onkeyup="filterLaws()">
+    <div class="filter-pills">
+      <button class="pill-btn active" onclick="setLawFilter('all', this)">الكل</button>
+      <button class="pill-btn" onclick="setLawFilter('cpp', this)">الإجراءات الجزائية</button>
+      <button class="pill-btn" onclick="setLawFilter('penal', this)">قانون العقوبات (2026)</button>
+    </div>
+    <input type="text" id="searchInput" class="search-box" placeholder="ابحث برقم المادة أو الكلمة (مثال: المادة 51، سرقة، تلبس، نصب...)" onkeyup="filterLaws()">
+    <div id="resultsCount" class="results-count"></div>
     <div id="lawsList"></div>
   </div>
 
   <div id="aiSection" class="ai-box">
     <div class="chat-area" id="chatArea">
       <div class="msg bot">
-        مرحباً بك. أنا مساعدك القانوني المتخصص <b>حصرياً في قانون الإجراءات الجزائية الجزائري</b>. اسألني عن أي إجراء، أجل قانوني، أو مادة وسأجيبك بدقة وفق آخر التعديلات.
+        مرحباً بك. أنا مساعدك القانوني المتخصص في <b>قانون الإجراءات الجزائية وقانون العقوبات الجزائريين (تحيين 2026)</b>. اسألني عن أي جريمة، عقوبة، إجراء، أو رقم مادة وسأجيبك بدقة.
       </div>
     </div>
 
     <div class="ai-input-group">
-      <input type="text" id="userQuestion" class="ai-input" placeholder="اكتب سؤالك القانوني هنا...">
+      <input type="text" id="userQuestion" class="ai-input" placeholder="اكتب سؤالك القانوني هنا..." onkeypress="if(event.key==='Enter') askAI()">
       <button class="send-btn" onclick="askAI()">إرسال</button>
     </div>
   </div>
 </div>
 
 <script>
+  let cppLaws = [];
+  let penalLaws = [];
   let allLaws = [];
+  let currentFilter = 'all';
 
   function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -138,6 +164,13 @@
       document.getElementById('lawsSection').classList.add('hidden');
       document.getElementById('aiSection').classList.add('active');
     }
+  }
+
+  function setLawFilter(type, btn) {
+    currentFilter = type;
+    document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filterLaws();
   }
 
   function updateOnlineStatus() {
@@ -155,15 +188,30 @@
   window.addEventListener('offline', updateOnlineStatus);
 
   async function loadLaws() {
+    // 1. تحميل قانون الإجراءات الجزائية
     try {
-      const res = await fetch('./laws.json?t=' + Date.now());
-      allLaws = await res.json();
-      localStorage.setItem('cached_laws', JSON.stringify(allLaws));
+      const resCpp = await fetch('./laws.json?t=' + Date.now());
+      const dataCpp = await resCpp.json();
+      cppLaws = dataCpp.map(item => ({ ...item, _type: 'cpp' }));
+      localStorage.setItem('cached_laws', JSON.stringify(cppLaws));
     } catch (e) {
-      const cached = localStorage.getItem('cached_laws');
-      if (cached) allLaws = JSON.parse(cached);
+      const cachedCpp = localStorage.getItem('cached_laws');
+      if (cachedCpp) cppLaws = JSON.parse(cachedCpp);
     }
-    renderLaws(allLaws);
+
+    // 2. تحميل قانون العقوبات (تحيين 2026)
+    try {
+      const resPenal = await fetch('./penal.json?t=' + Date.now());
+      const dataPenal = await resPenal.json();
+      penalLaws = dataPenal.map(item => ({ ...item, _type: 'penal' }));
+      localStorage.setItem('cached_penal', JSON.stringify(penalLaws));
+    } catch (e) {
+      const cachedPenal = localStorage.getItem('cached_penal');
+      if (cachedPenal) penalLaws = JSON.parse(cachedPenal);
+    }
+
+    allLaws = [...cppLaws, ...penalLaws];
+    filterLaws();
   }
 
   async function checkUpdates() {
@@ -181,19 +229,29 @@
       }
       localStorage.setItem('app_version', data.version);
     } catch (e) {
-      const savedVer = localStorage.getItem('app_version') || '1.0';
+      const savedVer = localStorage.getItem('app_version') || '1.1';
       document.getElementById('versionInfo').textContent = `نسخة محفوظة (${savedVer}) • تعمل بدون نت`;
     }
   }
 
   function renderLaws(list) {
     const container = document.getElementById('lawsList');
+    const countEl = document.getElementById('resultsCount');
+    
     if (!list.length) {
+      countEl.textContent = '';
       container.innerHTML = '<p style="text-align:center;color:#94a3b8;">لا توجد نتائج مطابقة.</p>';
       return;
     }
-    container.innerHTML = list.map(item => `
-      <div class="law-card">
+
+    // عرض أول 80 نتيجة لضمان سلاسة وسرعة التصفح على الهاتف
+    const displayed = list.slice(0, 80);
+    countEl.textContent = list.length > 80 
+      ? `عرض أول 80 مادة من أصل ${list.length} مادة (استخدم البحث للتحديد بدقة)` 
+      : `عدد المواد المطابقة: ${list.length}`;
+
+    container.innerHTML = displayed.map(item => `
+      <div class="law-card ${item._type === 'penal' ? 'penal-card' : ''}">
         <div class="law-header">
           <span class="art-num">${item.article}</span>
           <span class="art-cat">${item.category}</span>
@@ -205,14 +263,49 @@
   }
 
   function filterLaws() {
-    const q = document.getElementById('searchInput').value.toLowerCase();
-    const filtered = allLaws.filter(l =>
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    let baseList = allLaws;
+    if (currentFilter === 'cpp') baseList = cppLaws;
+    if (currentFilter === 'penal') baseList = penalLaws;
+
+    if (!q) {
+      renderLaws(baseList);
+      return;
+    }
+
+    const filtered = baseList.filter(l =>
       l.article.toLowerCase().includes(q) ||
       l.title.toLowerCase().includes(q) ||
       l.text.toLowerCase().includes(q) ||
       (l.keywords && l.keywords.toLowerCase().includes(q))
     );
     renderLaws(filtered);
+  }
+
+  // استخراج أكثر المواد صلة بالسؤال لإرسالها للذكاء الاصطناعي بسرعة ودقة
+  function getRelevantLaws(question) {
+    const words = question
+      .replace(/[؟?!.,،]/g, ' ')
+      .split(/\s+/)
+      .filter(w => w.length > 2 && !['ماهي', 'ماهو', 'كيف', 'هل', 'في', 'من', 'على', 'إلى', 'عن', 'قانون'].includes(w));
+
+    if (!words.length) return allLaws.slice(0, 15);
+
+    const scored = allLaws.map(law => {
+      let score = 0;
+      const fullStr = `${law.article} ${law.title} ${law.text}`.toLowerCase();
+      for (const w of words) {
+        if (law.article.toLowerCase().includes(w)) score += 10;
+        if (fullStr.includes(w.toLowerCase())) score += 2;
+      }
+      return { law, score };
+    });
+
+    return scored
+      .filter(item => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 15)
+      .map(item => item.law);
   }
 
   async function askAI() {
@@ -229,20 +322,21 @@
     chatArea.innerHTML += `<div class="msg user">${question}</div>`;
     input.value = '';
     const loadingId = 'load_' + Date.now();
-    chatArea.innerHTML += `<div class="msg bot" id="${loadingId}">⏳ جاري تحليل النصوص القانونية...</div>`;
+    chatArea.innerHTML += `<div class="msg bot" id="${loadingId}">⏳ جاري البحث في النصوص القانونية وتحليلها...</div>`;
     chatArea.scrollTop = chatArea.scrollHeight;
 
     try {
+      const relevantContext = getRelevantLaws(question);
       const response = await fetch('/api/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           question: question,
-          lawsContext: JSON.stringify(allLaws)
+          lawsContext: JSON.stringify(relevantContext)
         })
       });
       const data = await response.json();
-      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'حدث خطأ في الاتصال، تأكد من إضافة ملف api/ask.js ومفتاح GEMINI_API_KEY في Vercel.';
+      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'حدث خطأ في الاتصال، تأكد من إعدادات الخادم.';
       document.getElementById(loadingId).innerHTML = reply.replace(/\n/g, '<br>');
     } catch (err) {
       document.getElementById(loadingId).textContent = 'تعذر الاتصال بالخادم، تحقق من الإنترنت.';
