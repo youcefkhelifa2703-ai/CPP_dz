@@ -12,7 +12,6 @@
       --bg: #0f172a;
       --card: #1e293b;
       --gold: #f59e0b;
-      --gold-hover: #d97706;
       --text: #f8fafc;
       --muted: #94a3b8;
       --green: #10b981;
@@ -62,13 +61,12 @@
     .art-title { font-weight: 700; margin-bottom: 6px; font-size: 0.95rem; color: #e2e8f0; }
     .art-text { font-size: 0.9rem; line-height: 1.7; color: #cbd5e1; }
     
-    /* قسم الذكاء الاصطناعي */
     .ai-box { display: none; }
     .ai-box.active { display: block; }
     .laws-box.hidden { display: none; }
     .chat-area {
       background: var(--card); border-radius: 14px; padding: 14px;
-      min-height: 280px; max-height: 400px; overflow-y: auto;
+      min-height: 300px; max-height: 420px; overflow-y: auto;
       margin-bottom: 12px; border: 1px solid #334155;
     }
     .msg { padding: 10px 14px; border-radius: 12px; margin-bottom: 10px; font-size: 0.9rem; line-height: 1.6; }
@@ -82,10 +80,6 @@
     .send-btn {
       padding: 0 18px; border-radius: 12px; border: none;
       background: var(--gold); color: #000; font-weight: 800; cursor: pointer;
-    }
-    .api-setup {
-      background: rgba(245, 158, 11, 0.1); border: 1px dashed var(--gold);
-      padding: 12px; border-radius: 12px; margin-bottom: 12px; font-size: 0.85rem;
     }
     .update-banner {
       background: #065f46; color: #ecfdf5; padding: 10px; border-radius: 10px;
@@ -111,23 +105,12 @@
     <button class="tab-btn" onclick="switchTab('ai')">🤖 المستشار الذكي AI</button>
   </div>
 
-  <!-- قسم المواد القانونية Offline -->
   <div id="lawsSection" class="laws-box">
     <input type="text" id="searchInput" class="search-box" placeholder="ابحث برقم المادة أو الكلمة (مثال: توقيف، تلبس، تفتيش...)" onkeyup="filterLaws()">
     <div id="lawsList"></div>
   </div>
 
-  <!-- قسم الذكاء الاصطناعي -->
   <div id="aiSection" class="ai-box">
-    <div class="api-setup" id="apiSetupBox">
-      ⚙️ <b>تفعيل الذكاء الاصطناعي المجاني:</b><br>
-      أدخل مفتاح Gemini API المجاني مرة واحدة وسيعمل المستشار 24/24 ساعة:
-      <div style="display:flex; gap:6px; margin-top:8px;">
-        <input type="password" id="apiKeyInput" class="ai-input" placeholder="AIzaSy...">
-        <button class="send-btn" onclick="saveApiKey()">حفظ</button>
-      </div>
-    </div>
-
     <div class="chat-area" id="chatArea">
       <div class="msg bot">
         مرحباً بك. أنا مساعدك القانوني المتخصص <b>حصرياً في قانون الإجراءات الجزائية الجزائري</b>. اسألني عن أي إجراء، أجل قانوني، أو مادة وسأجيبك بدقة وفق آخر التعديلات.
@@ -143,23 +126,7 @@
 
 <script>
   let allLaws = [];
-  let GEMINI_KEY = localStorage.getItem('gemini_cpp_key') || '';
 
-  if (GEMINI_KEY) {
-    document.getElementById('apiSetupBox').style.display = 'none';
-  }
-
-  function saveApiKey() {
-    const key = document.getElementById('apiKeyInput').value.trim();
-    if (key) {
-      localStorage.setItem('gemini_cpp_key', key);
-      GEMINI_KEY = key;
-      document.getElementById('apiSetupBox').style.display = 'none';
-      alert('تم تفعيل الذكاء الاصطناعي بنجاح!');
-    }
-  }
-
-  // التبديل بين التبويبات
   function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     if (tab === 'laws') {
@@ -173,7 +140,6 @@
     }
   }
 
-  // مراقبة حالة الإنترنت
   function updateOnlineStatus() {
     const badge = document.getElementById('netStatus');
     if (navigator.onLine) {
@@ -188,7 +154,6 @@
   window.addEventListener('online', updateOnlineStatus);
   window.addEventListener('offline', updateOnlineStatus);
 
-  // جلب القوانين والتحديث التلقائي
   async function loadLaws() {
     try {
       const res = await fetch('./laws.json?t=' + Date.now());
@@ -250,15 +215,9 @@
     renderLaws(filtered);
   }
 
-  // الذكاء الاصطناعي المقيد بقانون الإجراءات الجزائية الجزائري فقط
   async function askAI() {
     if (!navigator.onLine) {
       alert('أنت حالياً بدون إنترنت. استخدم تبويب "المواد القانونية" للبحث الفوري بدون نت.');
-      return;
-    }
-    if (!GEMINI_KEY) {
-      document.getElementById('apiSetupBox').style.display = 'block';
-      alert('يرجى إدخال مفتاح Gemini API المجاني أولاً.');
       return;
     }
 
@@ -273,24 +232,17 @@
     chatArea.innerHTML += `<div class="msg bot" id="${loadingId}">⏳ جاري تحليل النصوص القانونية...</div>`;
     chatArea.scrollTop = chatArea.scrollHeight;
 
-    const lawsContext = JSON.stringify(allLaws);
-    const systemPrompt = `أنت مساعد قانوني جزائري متخصص حصرياً في قانون الإجراءات الجزائية الجزائري.
-قواعد صارمة:
-1. أجب فقط بناءً على قانون الإجراءات الجزائية الجزائري والنصوص المرفقة هنا: ${lawsContext}
-2. إذا سُئلت عن أي موضوع خارج قانون الإجراءات الجزائية الجزائري (رياضة، برمجة، قوانين دول أخرى، إلخ) اعتذر وقل: "عذراً، أنا مبرمج للإجابة حصرياً حول قانون الإجراءات الجزائية الجزائري فقط."
-3. اذكر رقم المادة القانونية بدقة في إجابتك.
-سؤال المستخدم: ${question}`;
-
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`, {
+      const response = await fetch('/api/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: systemPrompt }] }]
+          question: question,
+          lawsContext: JSON.stringify(allLaws)
         })
       });
       const data = await response.json();
-      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'حدث خطأ في الاتصال بالذكاء الاصطناعي، تأكد من صحة المفتاح.';
+      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'حدث خطأ في الاتصال، تأكد من إضافة ملف api/ask.js ومفتاح GEMINI_API_KEY في Vercel.';
       document.getElementById(loadingId).innerHTML = reply.replace(/\n/g, '<br>');
     } catch (err) {
       document.getElementById(loadingId).textContent = 'تعذر الاتصال بالخادم، تحقق من الإنترنت.';
@@ -298,7 +250,6 @@
     chatArea.scrollTop = chatArea.scrollHeight;
   }
 
-  // تسجيل Service Worker للعمل بدون إنترنت
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js');
   }
@@ -307,5 +258,4 @@
   updateOnlineStatus();
 </script>
 </body>
-  </html>
-  
+</html>
