@@ -1,0 +1,16 @@
+{
+  "name": "المساعد القانوني - الإجراءات الجزائية الجزائرية",
+  "short_name": "الإجراءات الجزائية",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#d97706",
+  "description": "مرجع قانون الإجراءات الجزائية الجزائري الذكي - يعمل بدون إنترنت ويتحدث تلقائياً",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/924/924915.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
