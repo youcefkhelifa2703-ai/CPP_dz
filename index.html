@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>الموسوعة الجزائية الجزائرية AI</title>
+  <title>المستشار الذكي - قانون العقوبات الجزائري AI</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -18,89 +18,122 @@
       --red: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
-    body { background: var(--bg); color: var(--text); padding-bottom: 80px; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+    }
     header {
       background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-      padding: 18px 16px;
+      padding: 14px 16px;
       border-bottom: 2px solid var(--gold);
-      position: sticky; top: 0; z-index: 100;
-      display: flex; justify-content: space-between; align-items: center;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
     }
     .logo h1 { font-size: 1.05rem; color: var(--gold); font-weight: 800; }
-    .logo p { font-size: 0.75rem; color: var(--muted); }
+    .logo p { font-size: 0.74rem; color: var(--muted); }
     .status-badge {
-      font-size: 0.72rem; padding: 4px 10px; border-radius: 20px;
-      background: rgba(16, 185, 129, 0.15); color: var(--green);
-      border: 1px solid var(--green); font-weight: 700;
+      font-size: 0.72rem;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--green);
+      border: 1px solid var(--green);
+      font-weight: 700;
     }
     .status-badge.offline {
-      background: rgba(239, 68, 68, 0.15); color: var(--red); border-color: var(--red);
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--red);
+      border-color: var(--red);
     }
-    .container { max-width: 700px; margin: auto; padding: 16px; }
-    .tabs { display: flex; gap: 8px; margin-bottom: 14px; }
-    .tab-btn {
-      flex: 1; padding: 12px; border: none; border-radius: 12px;
-      background: var(--card); color: var(--muted); font-weight: 700;
-      font-size: 0.9rem; cursor: pointer; transition: 0.2s;
+    .container {
+      max-width: 750px;
+      width: 100%;
+      margin: auto;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
     }
-    .tab-btn.active { background: var(--gold); color: #000; }
-    .filter-pills {
-      display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto;
+    .quick-prompts {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 8px;
+      flex-shrink: 0;
     }
-    .pill-btn {
-      flex: 1; padding: 8px 10px; border-radius: 10px;
-      border: 1px solid #334155; background: var(--card);
-      color: var(--muted); font-size: 0.8rem; font-weight: 700;
-      cursor: pointer; white-space: nowrap; transition: 0.2s;
+    .quick-prompts::-webkit-scrollbar { display: none; }
+    .prompt-chip {
+      background: var(--card);
+      border: 1px solid #334155;
+      color: #e2e8f0;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: 0.2s;
     }
-    .pill-btn.active {
-      border-color: var(--gold); color: var(--gold); background: rgba(245, 158, 11, 0.12);
-    }
-    .search-box {
-      width: 100%; padding: 14px; border-radius: 12px;
-      border: 1px solid #334155; background: var(--card);
-      color: var(--text); font-size: 0.95rem; margin-bottom: 10px;
-    }
-    .search-box:focus { outline: none; border-color: var(--gold); }
-    .results-count {
-      font-size: 0.78rem; color: var(--muted); margin-bottom: 10px; text-align: left;
-    }
-    .law-card {
-      background: var(--card); border-radius: 14px; padding: 16px;
-      margin-bottom: 12px; border-right: 4px solid var(--gold);
-      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-    }
-    .law-card.penal-card { border-right-color: #38bdf8; }
-    .law-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px; }
-    .art-num { color: var(--gold); font-weight: 800; font-size: 1rem; }
-    .law-card.penal-card .art-num { color: #38bdf8; }
-    .art-cat { font-size: 0.72rem; background: #334155; padding: 2px 8px; border-radius: 6px; color: #e2e8f0; }
-    .art-title { font-weight: 700; margin-bottom: 6px; font-size: 0.95rem; color: #e2e8f0; }
-    .art-text { font-size: 0.9rem; line-height: 1.75; color: #cbd5e1; }
-    
-    .ai-box { display: none; }
-    .ai-box.active { display: block; }
-    .laws-box.hidden { display: none; }
+    .prompt-chip:hover { border-color: var(--gold); color: var(--gold); }
     .chat-area {
-      background: var(--card); border-radius: 14px; padding: 14px;
-      min-height: 300px; max-height: 420px; overflow-y: auto;
-      margin-bottom: 12px; border: 1px solid #334155;
+      background: var(--card);
+      border-radius: 14px;
+      padding: 14px;
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      border: 1px solid #334155;
     }
-    .msg { padding: 10px 14px; border-radius: 12px; margin-bottom: 10px; font-size: 0.9rem; line-height: 1.65; }
-    .msg.bot { background: #0f172a; border-right: 3px solid var(--gold); }
-    .msg.user { background: var(--gold); color: #000; font-weight: 600; margin-right: 20%; }
-    .ai-input-group { display: flex; gap: 8px; }
+    .msg {
+      padding: 12px 15px;
+      border-radius: 14px;
+      margin-bottom: 12px;
+      font-size: 0.92rem;
+      line-height: 1.75;
+      word-wrap: break-word;
+    }
+    .msg.bot {
+      background: #0f172a;
+      border-right: 3px solid var(--gold);
+      color: #f1f5f9;
+    }
+    .msg.bot b, .msg.bot strong { color: var(--gold); }
+    .msg.user {
+      background: var(--gold);
+      color: #000;
+      font-weight: 700;
+      margin-right: 18%;
+    }
+    .ai-input-group {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
     .ai-input {
-      flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #334155;
-      background: var(--card); color: var(--text); font-size: 0.9rem;
+      flex: 1;
+      padding: 13px 14px;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      background: var(--card);
+      color: var(--text);
+      font-size: 0.95rem;
     }
+    .ai-input:focus { outline: none; border-color: var(--gold); }
     .send-btn {
-      padding: 0 18px; border-radius: 12px; border: none;
-      background: var(--gold); color: #000; font-weight: 800; cursor: pointer;
-    }
-    .update-banner {
-      background: #065f46; color: #ecfdf5; padding: 10px; border-radius: 10px;
-      font-size: 0.82rem; margin-bottom: 12px; display: none; text-align: center;
+      padding: 0 20px;
+      border-radius: 12px;
+      border: none;
+      background: var(--gold);
+      color: #000;
+      font-weight: 800;
+      font-size: 0.95rem;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -108,209 +141,61 @@
 
 <header>
   <div class="logo">
-    <h1>⚖️ الإجراءات الجزائية والعقوبات DZ</h1>
-    <p id="versionInfo">جاري التحقق من التحديثات...</p>
+    <h1>⚖️ قانون العقوبات الجزائري AI</h1>
+    <p>مُحيّن تلقائياً وفق الجريدة الرسمية</p>
   </div>
-  <div id="netStatus" class="status-badge">متصل • محدث</div>
+  <div id="netStatus" class="status-badge">متصل بالشبكة</div>
 </header>
 
 <div class="container">
-  <div id="updateBanner" class="update-banner"></div>
-
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('laws')">📚 المواد القانونية (بدون نت)</button>
-    <button class="tab-btn" onclick="switchTab('ai')">🤖 المستشار الذكي AI</button>
+  <div class="quick-prompts">
+    <button class="prompt-chip" onclick="usePrompt('ما هي عقوبة السرقة الموصوفة في قانون العقوبات الجزائري؟')">عقوبة السرقة الموصوفة</button>
+    <button class="prompt-chip" onclick="usePrompt('اشرح لي أحكام المادة 264 من قانون العقوبات الجزائري')">المادة 264 (الضرب والجرح)</button>
+    <button class="prompt-chip" onclick="usePrompt('ما هي شروط الدفاع المشروع في قانون العقوبات الجزائري؟')">الدفاع المشروع</button>
+    <button class="prompt-chip" onclick="usePrompt('ما هي عقوبة إصدار شيك بدون رصيد؟')">شيك بدون رصيد</button>
   </div>
 
-  <div id="lawsSection" class="laws-box">
-    <div class="filter-pills">
-      <button class="pill-btn active" onclick="setLawFilter('all', this)">الكل</button>
-      <button class="pill-btn" onclick="setLawFilter('cpp', this)">الإجراءات الجزائية</button>
-      <button class="pill-btn" onclick="setLawFilter('penal', this)">قانون العقوبات (2026)</button>
+  <div class="chat-area" id="chatArea">
+    <div class="msg bot">
+      مرحباً بك. أنا مستشارك القانوني الذكي المتخصص <b>حصرياً في قانون العقوبات الجزائري</b> ومرتبط بالبحث المباشر في آخر التعديلات التشريعية.<br>
+      اطرح سؤالك أو اكتب رقم المادة القانونية وسأوافيك بالنص والعقوبة بدقة.
     </div>
-    <input type="text" id="searchInput" class="search-box" placeholder="ابحث برقم المادة أو الكلمة (مثال: المادة 51، سرقة، تلبس، نصب...)" onkeyup="filterLaws()">
-    <div id="resultsCount" class="results-count"></div>
-    <div id="lawsList"></div>
   </div>
 
-  <div id="aiSection" class="ai-box">
-    <div class="chat-area" id="chatArea">
-      <div class="msg bot">
-        مرحباً بك. أنا مساعدك القانوني المتخصص في <b>قانون الإجراءات الجزائية وقانون العقوبات الجزائريين (تحيين 2026)</b>. اسألني عن أي جريمة، عقوبة، إجراء، أو رقم مادة وسأجيبك بدقة.
-      </div>
-    </div>
-
-    <div class="ai-input-group">
-      <input type="text" id="userQuestion" class="ai-input" placeholder="اكتب سؤالك القانوني هنا..." onkeypress="if(event.key==='Enter') askAI()">
-      <button class="send-btn" onclick="askAI()">إرسال</button>
-    </div>
+  <div class="ai-input-group">
+    <input type="text" id="userQuestion" class="ai-input" placeholder="اسأل عن مادة، جريمة، أو عقوبة..." onkeypress="if(event.key==='Enter') askAI()">
+    <button class="send-btn" onclick="askAI()">إرسال</button>
   </div>
 </div>
 
 <script>
-  let cppLaws = [];
-  let penalLaws = [];
-  let allLaws = [];
-  let currentFilter = 'all';
-
-  function switchTab(tab) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    if (tab === 'laws') {
-      document.querySelectorAll('.tab-btn')[0].classList.add('active');
-      document.getElementById('lawsSection').classList.remove('hidden');
-      document.getElementById('aiSection').classList.remove('active');
-    } else {
-      document.querySelectorAll('.tab-btn')[1].classList.add('active');
-      document.getElementById('lawsSection').classList.add('hidden');
-      document.getElementById('aiSection').classList.add('active');
-    }
-  }
-
-  function setLawFilter(type, btn) {
-    currentFilter = type;
-    document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    filterLaws();
-  }
-
   function updateOnlineStatus() {
     const badge = document.getElementById('netStatus');
     if (navigator.onLine) {
       badge.textContent = 'متصل • محدث تلقائياً';
       badge.classList.remove('offline');
-      checkUpdates();
     } else {
-      badge.textContent = 'وضع بدون إنترنت (Offline)';
+      badge.textContent = 'غير متصل بالإنترنت';
       badge.classList.add('offline');
     }
   }
   window.addEventListener('online', updateOnlineStatus);
   window.addEventListener('offline', updateOnlineStatus);
 
-  async function loadLaws() {
-    // 1. تحميل قانون الإجراءات الجزائية
-    try {
-      const resCpp = await fetch('./laws.json?t=' + Date.now());
-      const dataCpp = await resCpp.json();
-      cppLaws = dataCpp.map(item => ({ ...item, _type: 'cpp' }));
-      localStorage.setItem('cached_laws', JSON.stringify(cppLaws));
-    } catch (e) {
-      const cachedCpp = localStorage.getItem('cached_laws');
-      if (cachedCpp) cppLaws = JSON.parse(cachedCpp);
-    }
-
-    // 2. تحميل قانون العقوبات (تحيين 2026)
-    try {
-      const resPenal = await fetch('./penal.json?t=' + Date.now());
-      const dataPenal = await resPenal.json();
-      penalLaws = dataPenal.map(item => ({ ...item, _type: 'penal' }));
-      localStorage.setItem('cached_penal', JSON.stringify(penalLaws));
-    } catch (e) {
-      const cachedPenal = localStorage.getItem('cached_penal');
-      if (cachedPenal) penalLaws = JSON.parse(cachedPenal);
-    }
-
-    allLaws = [...cppLaws, ...penalLaws];
-    filterLaws();
+  function usePrompt(text) {
+    document.getElementById('userQuestion').value = text;
+    askAI();
   }
 
-  async function checkUpdates() {
-    try {
-      const res = await fetch('./version.json?t=' + Date.now());
-      const data = await res.json();
-      const oldVer = localStorage.getItem('app_version');
-      document.getElementById('versionInfo').textContent = `الإصدار ${data.version} • تحيين ${data.updated_at}`;
-      
-      if (oldVer && oldVer !== data.version) {
-        const banner = document.getElementById('updateBanner');
-        banner.style.display = 'block';
-        banner.textContent = `✅ تم تحديث القوانين تلقائياً إلى الإصدار ${data.version}`;
-        await loadLaws();
-      }
-      localStorage.setItem('app_version', data.version);
-    } catch (e) {
-      const savedVer = localStorage.getItem('app_version') || '1.1';
-      document.getElementById('versionInfo').textContent = `نسخة محفوظة (${savedVer}) • تعمل بدون نت`;
-    }
-  }
-
-  function renderLaws(list) {
-    const container = document.getElementById('lawsList');
-    const countEl = document.getElementById('resultsCount');
-    
-    if (!list.length) {
-      countEl.textContent = '';
-      container.innerHTML = '<p style="text-align:center;color:#94a3b8;">لا توجد نتائج مطابقة.</p>';
-      return;
-    }
-
-    // عرض أول 80 نتيجة لضمان سلاسة وسرعة التصفح على الهاتف
-    const displayed = list.slice(0, 80);
-    countEl.textContent = list.length > 80 
-      ? `عرض أول 80 مادة من أصل ${list.length} مادة (استخدم البحث للتحديد بدقة)` 
-      : `عدد المواد المطابقة: ${list.length}`;
-
-    container.innerHTML = displayed.map(item => `
-      <div class="law-card ${item._type === 'penal' ? 'penal-card' : ''}">
-        <div class="law-header">
-          <span class="art-num">${item.article}</span>
-          <span class="art-cat">${item.category}</span>
-        </div>
-        <div class="art-title">${item.title}</div>
-        <div class="art-text">${item.text}</div>
-      </div>
-    `).join('');
-  }
-
-  function filterLaws() {
-    const q = document.getElementById('searchInput').value.trim().toLowerCase();
-    let baseList = allLaws;
-    if (currentFilter === 'cpp') baseList = cppLaws;
-    if (currentFilter === 'penal') baseList = penalLaws;
-
-    if (!q) {
-      renderLaws(baseList);
-      return;
-    }
-
-    const filtered = baseList.filter(l =>
-      l.article.toLowerCase().includes(q) ||
-      l.title.toLowerCase().includes(q) ||
-      l.text.toLowerCase().includes(q) ||
-      (l.keywords && l.keywords.toLowerCase().includes(q))
-    );
-    renderLaws(filtered);
-  }
-
-  // استخراج أكثر المواد صلة بالسؤال لإرسالها للذكاء الاصطناعي بسرعة ودقة
-  function getRelevantLaws(question) {
-    const words = question
-      .replace(/[؟?!.,،]/g, ' ')
-      .split(/\s+/)
-      .filter(w => w.length > 2 && !['ماهي', 'ماهو', 'كيف', 'هل', 'في', 'من', 'على', 'إلى', 'عن', 'قانون'].includes(w));
-
-    if (!words.length) return allLaws.slice(0, 15);
-
-    const scored = allLaws.map(law => {
-      let score = 0;
-      const fullStr = `${law.article} ${law.title} ${law.text}`.toLowerCase();
-      for (const w of words) {
-        if (law.article.toLowerCase().includes(w)) score += 10;
-        if (fullStr.includes(w.toLowerCase())) score += 2;
-      }
-      return { law, score };
-    });
-
-    return scored
-      .filter(item => item.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 15)
-      .map(item => item.law);
+  function formatMarkdown(text) {
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+      .replace(/\n/g, '<br>');
   }
 
   async function askAI() {
     if (!navigator.onLine) {
-      alert('أنت حالياً بدون إنترنت. استخدم تبويب "المواد القانونية" للبحث الفوري بدون نت.');
+      alert('يرجى الاتصال بالإنترنت للبحث في النصوص القانونية المحدثة.');
       return;
     }
 
@@ -322,33 +207,31 @@
     chatArea.innerHTML += `<div class="msg user">${question}</div>`;
     input.value = '';
     const loadingId = 'load_' + Date.now();
-    chatArea.innerHTML += `<div class="msg bot" id="${loadingId}">⏳ جاري البحث في النصوص القانونية وتحليلها...</div>`;
+    chatArea.innerHTML += `<div class="msg bot" id="${loadingId}">⏳ جاري البحث في نصوص قانون العقوبات الجزائري وتحليلها...</div>`;
     chatArea.scrollTop = chatArea.scrollHeight;
 
     try {
-      const relevantContext = getRelevantLaws(question);
       const response = await fetch('/api/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          question: question,
-          lawsContext: JSON.stringify(relevantContext)
-        })
+        body: JSON.stringify({ question })
       });
       const data = await response.json();
-      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'حدث خطأ في الاتصال، تأكد من إعدادات الخادم.';
-      document.getElementById(loadingId).innerHTML = reply.replace(/\n/g, '<br>');
+      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'تعذر الحصول على إجابة، حاول مرة أخرى.';
+      document.getElementById(loadingId).innerHTML = formatMarkdown(reply);
     } catch (err) {
-      document.getElementById(loadingId).textContent = 'تعذر الاتصال بالخادم، تحقق من الإنترنت.';
+      document.getElementById(loadingId).textContent = 'حدث خطأ في الاتصال بالخادم، تحقق من الإنترنت.';
     }
     chatArea.scrollTop = chatArea.scrollHeight;
   }
 
+  // إلغاء تسجيل Service Worker القديم لإزالة التخزين المؤقت القديم
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js');
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      for (let reg of regs) reg.unregister();
+    });
   }
 
-  loadLaws();
   updateOnlineStatus();
 </script>
 </body>
