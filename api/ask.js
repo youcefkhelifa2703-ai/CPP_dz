@@ -23,26 +23,39 @@ export default async function handler(req, res) {
 3. اذكر رقم المادة القانونية بدقة في إجابتك.
 سؤال المستخدم: ${question}`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: systemPrompt }] }]
-        })
+    const models = [
+      'gemini-3.8-flash',
+      'gemini-3.8-flash-lite',
+      'gemini-3.0-flash',
+      'gemini-2.5-flash-lite'
+    ];
+
+    let lastError = '';
+
+    for (const model of models) {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: systemPrompt }] }]
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      if (!data.error && data.candidates?.[0]?.content?.parts?.[0]?.text) {
+        return res.status(200).json(data);
       }
-    );
 
-    const data = await response.json();
-
-    if (data.error) {
-      return res.status(200).json({
-        candidates: [{ content: { parts: [{ text: `⚠️ رد Google API: ${data.error.message}` }] } }]
-      });
+      lastError = data.error?.message || 'فشل الاستجابة من النموذج';
     }
 
-    return res.status(200).json(data);
+    return res.status(200).json({
+      candidates: [{ content: { parts: [{ text: `⚠️ جميع النماذج مزدحمة حالياً، يرجى المحاولة بعد قليل. (${lastError})` }] } }]
+    });
   } catch (error) {
     return res.status(200).json({
       candidates: [{ content: { parts: [{ text: `⚠️ خطأ تقني: ${error.message}` }] } }]
