@@ -7,7 +7,6 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://js.puter.com/v2/"></script>
   <style>
     :root {
       --bg: #0f172a;
@@ -148,28 +147,99 @@
 
 <div class="container">
   <div class="quick-prompts">
-    <button class="prompt-chip" onclick="usePrompt('ما هي عقوبة السرقة الموصوفة في قانون العقوبات الجزائري؟')">عقوبة السرقة الموصوفة</button>
-    <button class="prompt-chip" onclick="usePrompt('اشرح لي أحكام المادة 264 من قانون العقوبات الجزائري')">المادة 264 (الضرب والجرح)</button>
-    <button class="prompt-chip" onclick="usePrompt('ما هي شروط الدفاع المشروع في قانون العقوبات الجزائري؟')">الدفاع المشروع</button>
-    <button class="prompt-chip" onclick="usePrompt('ما هي عقوبة إصدار شيك بدون رصيد؟')">شيك بدون رصيد</button>
+    <button type="button" class="prompt-chip" onclick="usePrompt('ما هي عقوبة السرقة الموصوفة في قانون العقوبات الجزائري؟')">عقوبة السرقة الموصوفة</button>
+    <button type="button" class="prompt-chip" onclick="usePrompt('اشرح لي أحكام المادة 264 من قانون العقوبات الجزائري')">المادة 264 (الضرب والجرح)</button>
+    <button type="button" class="prompt-chip" onclick="usePrompt('ما هي شروط الدفاع المشروع في قانون العقوبات الجزائري؟')">الدفاع المشروع</button>
+    <button type="button" class="prompt-chip" onclick="usePrompt('ما هي عقوبة إصدار شيك بدون رصيد؟')">شيك بدون رصيد</button>
   </div>
 
   <div class="chat-area" id="chatArea">
     <div class="msg bot">
       مرحباً بك في <b>القسطاس الجنائي AI</b>، مستشارك الذكي المتخصص <b>حصرياً في قانون العقوبات الجزائري</b>.<br>
-      اطرح سؤالك أو اكتب رقم المادة القانونية، وسيقوم الذكاء الاصطناعي بتحليلها فوراً دون أي مفاتيح أو قيود.
+      اطرح سؤالك أو اكتب رقم المادة القانونية، وسيقوم الذكاء الاصطناعي بتحليلها فوراً.
     </div>
   </div>
 
   <div class="ai-input-group">
-    <input type="text" id="userQuestion" class="ai-input" placeholder="اسأل عن مادة، جريمة، أو عقوبة..." onkeypress="if(event.key==='Enter') askAI()">
-    <button class="send-btn" onclick="askAI()">إرسال</button>
+    <input type="text" id="userQuestion" class="ai-input" placeholder="اسأل عن مادة، جريمة، أو عقوبة...">
+    <button type="button" id="sendBtn" class="send-btn" onclick="askAI()">إرسال</button>
   </div>
 </div>
 
 <script>
-  const SYSTEM_INSTRUCTION = `أنت خبير في القانون الجنائي الجزائري وقانون العقوبات الجزائري (الأمر رقم 66-156 المعدل والمتمم).
+  const SYSTEM_INSTRUCTION = `أنت خبير في القانون الجنائي الجزائري وقانون العقوبات الجزائري (الأمر رقم 66-156 المعدل والمتمم بجميع القوانين السارية المفعول، بما فيها تعديلات 2024 و2025 و2026).
 عندما يسألك المستخدم عن رقم مادة (مثلاً: المادة 66، المادة 50، المادة 264...) أو عن جريمة أو مصطلح جنائي:
 1. أجب فوراً وبشكل مباشر دون أن تطلب من المستخدم إرسال نص المادة أو توضيح السياق.
-2. اذكر موضوع المادة ومضمون
-  
+2. اذكر موضوع المادة ومضمونها القانوني في قانون العقوبات الجزائري (الأمر 66-156)، وأركانها أو شروط تطبيقها، والعقوبة المقررة لها (الحبس/السجن، الغرامة بالدينار الجزائري، العقوبات التكميلية) أو حالة إلغائها/تعديلها إن كانت ملغاة.
+3. إذا كان السؤال خارج القانون الجنائي الجزائري، اعتذر بلباقة وقل: "عذراً، تخصصي يقتصر على أحكام قانون العقوبات الجزائري فقط."
+4. نظم الإجابة في نقاط واضحة ومباشرة باللغة العربية الفصحى.`;
+
+  document.getElementById('userQuestion').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      askAI();
+    }
+  });
+
+  function usePrompt(text) {
+    document.getElementById('userQuestion').value = text;
+    askAI();
+  }
+
+  function escapeHTML(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function formatMarkdown(text) {
+    return escapeHTML(text)
+      .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+      .replace(/\n/g, '<br>');
+  }
+
+  async function askAI() {
+    const input = document.getElementById('userQuestion');
+    const sendBtn = document.getElementById('sendBtn');
+    const question = input.value.trim();
+    if (!question) return;
+
+    const chatArea = document.getElementById('chatArea');
+    chatArea.innerHTML += `<div class="msg user">${escapeHTML(question)}</div>`;
+    input.value = '';
+    sendBtn.disabled = true;
+    sendBtn.textContent = '...';
+
+    const loadingId = 'load_' + Date.now();
+    chatArea.innerHTML += `<div class="msg bot" id="${loadingId}">⏳ جاري تحليل السؤال وفق قانون العقوبات الجزائري...</div>`;
+    chatArea.scrollTop = chatArea.scrollHeight;
+
+    try {
+      const response = await fetch('https://text.pollinations.ai/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            { role: 'system', content: SYSTEM_INSTRUCTION },
+            { role: 'user', content: question }
+          ],
+          model: 'openai',
+          seed: Math.floor(Math.random() * 10000)
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('HTTP ' + response.status);
+      }
+
+      const replyText = await response.text();
+      document.getElementById(loadingId).innerHTML = formatMarkdown(replyText || 'لم يتم استلام رد.');
+    } catch (err) {
+      document.getElementById(loadingId).textContent = '⚠️ تعذر الاتصال بالخادم، تحقق من الإنترنت وأعد المحاولة.';
+    } finally {
+      sendBtn.disabled = false;
+      sendBtn.textContent = 'إرسال';
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+  }
+</script>
+</body>
+</html>
