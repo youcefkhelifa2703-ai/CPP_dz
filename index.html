@@ -155,7 +155,7 @@
 <header>
   <div class="logo">
     <h1>⚖️ القسطاس الجنائي AI</h1>
-    <p>مدعوم بمحرك Gemini • قانون العقوبات الجزائري</p>
+    <p>قانون العقوبات الجزائري • استجابة فورية</p>
   </div>
   <div class="official-links">
     <button type="button" class="joradp-btn" onclick="toggleKeyBar()">🔑 المفتاح</button>
@@ -165,7 +165,7 @@
 </header>
 
 <div class="key-bar" id="keyBar">
-  <input type="text" id="geminiKeyInput" class="key-input" placeholder="الصق مفتاح Gemini API Key هنا...">
+  <input type="text" id="groqKeyInput" class="key-input" placeholder="gsk_... الصق مفتاح Groq المجاني هنا">
   <button type="button" class="send-btn" style="padding:0 14px;font-size:0.82rem;" onclick="saveKey()">حفظ</button>
 </div>
 
@@ -179,14 +179,14 @@
 
   <div class="chat-area" id="chatArea">
     <div class="msg bot">
-      مرحباً بك في <b>القسطاس الجنائي AI</b> المدعوم مباشرة بمحرك <b>Google Gemini</b>.<br>
-      اسأل عن أي مادة أو جريمة في قانون العقوبات الجزائري وسأجيبك بدقة ومباشرة.
+      مرحباً بك في <b>القسطاس الجنائي AI</b>.<br>
+      للبدء: اضغط على زر <b>🔑 المفتاح</b> في الأعلى، الصق مفتاح <b>Groq</b> المجاني (يبدأ بـ <code>gsk_</code>) واضغط <b>حفظ</b>، ثم اسأل عن أي مادة أو جريمة في قانون العقوبات الجزائري.
     </div>
   </div>
 
   <div class="ai-input-group">
     <input type="text" id="userQuestion" class="ai-input" placeholder="اسأل عن مادة، جريمة، أو عقوبة...">
-    <button type="button" id="sendBtn" class="send-btn" onclick="askGemini()">إرسال</button>
+    <button type="button" id="sendBtn" class="send-btn" onclick="askGroq()">إرسال</button>
   </div>
 </div>
 
@@ -194,15 +194,19 @@
   const SYSTEM_INSTRUCTION = `أنت مستشار قانوني جزائري خبير ومتخصص حصرياً في قانون العقوبات الجزائري (الأمر رقم 66-156 المؤرخ في 8 يونيو 1966، المعدل والمتمم بجميع القوانين السارية المفعول، بما فيها القانون 24-06).
 قواعد صارمة:
 1. أجب فوراً وبشكل مباشر على سؤال المستخدم دون أن تطلب منه إرسال نص المادة أو توضيح السياق.
-2. اذكر رقم المادة المطبقة بدقة، ومضمونها القانوني الحقيقي في قانون العقوبات الجزائري، وأركان الجريمة، والعقوبة المقررة (الحبس أو السجن والغرامة بالدينار الجزائري)، مع التنبيه إن كانت المادة ملغاة أو معدلة.
-3. إذا كان السؤال خارج القانون الجنائي الجزائري، اعتذر باختصار وقل: "عذراً، تخصصي يقتصر على أحكام قانون العقوبات الجزائري فقط."
-4. نظم الإجابة في نقاط واضحة ومباشرة باللغة العربية الفصحى.`;
+2. التزم بالترقيم الرسمي الحقيقي لقانون العقوبات الجزائري (الأمر 66-156):
+   - المواد 1 إلى 60 مكرر: المبادئ العامة، العقوبات، المسؤولية الجزائية، أسباب الإباحة (المادتان 39 و40)، المساهمة والاشتراك (المواد 41 إلى 46)، الأعذار والظروف (المواد 52 إلى 54 مكرر).
+   - المواد 61 إلى 96: الجنايات والجنح ضد أمن الدولة (الخيانة والتجسس في المواد 61 إلى 66 وما يليها).
+   - المواد 254 إلى 349: الجنايات والجنح ضد الأشخاص (القتل، الضرب والجرح العمدي في المادة 264 وما يليها).
+   - المواد 350 إلى 417: الجنايات والجنح ضد الأموال (السرقة في المواد 350 إلى 354، النصب، خيانة الأمانة، الشيك بدون رصيد في المادة 374).
+3. اذكر رقم المادة المطبقة بدقة، ومضمونها القانوني الحقيقي، وأركان الجريمة، والعقوبة المقررة (الحبس أو السجن والغرامة بالدينار الجزائري)، مع التنبيه إن كانت المادة ملغاة أو معدلة.
+4. إذا كان السؤال خارج القانون الجنائي الجزائري، اعتذر باختصار وقل: "عذراً، تخصصي يقتصر على أحكام قانون العقوبات الجزائري فقط."
+5. نظم الإجابة في نقاط واضحة ومباشرة باللغة العربية الفصحى.`;
 
   window.addEventListener('DOMContentLoaded', () => {
-    localStorage.removeItem('qistas_active_model');
-    const saved = localStorage.getItem('qistas_gemini_key');
+    const saved = localStorage.getItem('qistas_groq_key');
     if (saved) {
-      document.getElementById('geminiKeyInput').value = saved;
+      document.getElementById('groqKeyInput').value = saved;
     } else {
       document.getElementById('keyBar').classList.add('open');
     }
@@ -213,27 +217,26 @@
   }
 
   function saveKey() {
-    const val = document.getElementById('geminiKeyInput').value.trim();
-    if (val.length < 15) {
-      alert('يرجى إدخال مفتاح Gemini صحيح');
+    const val = document.getElementById('groqKeyInput').value.trim();
+    if (!val.startsWith('gsk_')) {
+      alert('يرجى إدخال مفتاح Groq صحيح يبدأ بـ gsk_');
       return;
     }
-    localStorage.setItem('qistas_gemini_key', val);
-    localStorage.removeItem('qistas_active_model');
+    localStorage.setItem('qistas_groq_key', val);
     document.getElementById('keyBar').classList.remove('open');
-    alert('تم حفظ المفتاح بنجاح!');
+    alert('تم حفظ مفتاح Groq بنجاح!');
   }
 
   document.getElementById('userQuestion').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
       e.preventDefault();
-      askGemini();
+      askGroq();
     }
   });
 
   function usePrompt(text) {
     document.getElementById('userQuestion').value = text;
-    askGemini();
+    askGroq();
   }
 
   function escapeHTML(str) {
@@ -246,46 +249,16 @@
       .replace(/\n/g, '<br>');
   }
 
-  async function detectAvailableModel(apiKey) {
-    const cached = localStorage.getItem('qistas_active_model');
-    if (cached) return cached;
-
-    try {
-      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models', {
-        headers: { 'x-goog-api-key': apiKey }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        const geminiModels = (data.models || [])
-          .filter(m =>
-            m.supportedGenerationMethods &&
-            m.supportedGenerationMethods.includes('generateContent') &&
-            m.name.includes('gemini') &&
-            m.name.includes('flash') &&
-            !m.name.includes('tts') &&
-            !m.name.includes('image')
-          )
-          .map(m => m.name.replace('models/', ''));
-        if (geminiModels.length > 0) {
-          const chosen = geminiModels[geminiModels.length - 1];
-          localStorage.setItem('qistas_active_model', chosen);
-          return chosen;
-        }
-      }
-    } catch (e) {}
-    return 'gemini-3.8-flash';
-  }
-
-  async function askGemini() {
-    const inputVal = document.getElementById('geminiKeyInput').value.trim();
-    if (inputVal.length >= 15) {
-      localStorage.setItem('qistas_gemini_key', inputVal);
+  async function askGroq() {
+    const inputVal = document.getElementById('groqKeyInput').value.trim();
+    if (inputVal.startsWith('gsk_')) {
+      localStorage.setItem('qistas_groq_key', inputVal);
     }
 
-    const apiKey = localStorage.getItem('qistas_gemini_key');
+    const apiKey = localStorage.getItem('qistas_groq_key');
     if (!apiKey) {
       document.getElementById('keyBar').classList.add('open');
-      alert('يرجى لصق مفتاح Gemini في الشريط العلوي أولاً والضغط على حفظ.');
+      alert('يرجى لصق مفتاح Groq (يبدأ بـ gsk_) في الشريط العلوي أولاً والضغط على حفظ.');
       return;
     }
 
@@ -301,40 +274,32 @@
     sendBtn.textContent = '...';
 
     const loadingId = 'load_' + Date.now();
-    chatArea.innerHTML += `<div class="msg bot" id="${loadingId}">⏳ جاري التحليل القانوني عبر Gemini...</div>`;
+    chatArea.innerHTML += `<div class="msg bot" id="${loadingId}">⏳ جاري استخراج الحكم القانوني...</div>`;
     chatArea.scrollTop = chatArea.scrollHeight;
 
     try {
-      const activeModel = await detectAvailableModel(apiKey);
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${activeModel}:generateContent`;
-      const fullPrompt = `${SYSTEM_INSTRUCTION}\n\nسؤال المستخدم: ${question}`;
-
-      const response = await fetch(url, {
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-goog-api-key': apiKey
+          'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          contents: [
-            {
-              role: 'user',
-              parts: [{ text: fullPrompt }]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.1
-          }
+          model: 'llama-3.3-70b-versatile',
+          temperature: 0.1,
+          messages: [
+            { role: 'system', content: SYSTEM_INSTRUCTION },
+            { role: 'user', content: question }
+          ]
         })
       });
 
       const data = await response.json();
       if (!response.ok) {
-        localStorage.removeItem('qistas_active_model');
-        throw new Error(data?.error?.message || 'حدث خطأ أثناء الاتصال بالخادم');
+        throw new Error(data?.error?.message || 'تأكد من صحة مفتاح Groq');
       }
 
-      const replyText = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'لم يتم الحصول على رد.';
+      const replyText = data?.choices?.[0]?.message?.content || 'لم يتم الحصول على رد.';
       document.getElementById(loadingId).innerHTML = formatMarkdown(replyText);
     } catch (err) {
       document.getElementById(loadingId).innerHTML = `⚠️ <b>تنبيه:</b> ${escapeHTML(err.message)}`;
