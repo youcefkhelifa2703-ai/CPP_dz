@@ -24,19 +24,19 @@
     }
     header {
       background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-      padding: 12px 16px;
+      padding: 12px 14px;
       border-bottom: 2px solid var(--gold);
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-shrink: 0;
     }
-    .logo h1 { font-size: 1.05rem; color: var(--gold); font-weight: 800; }
-    .logo p { font-size: 0.72rem; color: var(--muted); }
-    .official-links { display: flex; gap: 6px; }
+    .logo h1 { font-size: 1rem; color: var(--gold); font-weight: 800; }
+    .logo p { font-size: 0.7rem; color: var(--muted); }
+    .official-links { display: flex; gap: 5px; align-items: center; }
     .joradp-btn {
-      font-size: 0.72rem;
-      padding: 5px 10px;
+      font-size: 0.7rem;
+      padding: 5px 8px;
       border-radius: 10px;
       background: rgba(245, 158, 11, 0.15);
       color: var(--gold);
@@ -44,6 +44,25 @@
       font-weight: 700;
       text-decoration: none;
       white-space: nowrap;
+      cursor: pointer;
+    }
+    .key-bar {
+      background: #1e293b;
+      padding: 10px 14px;
+      border-bottom: 1px solid #334155;
+      display: none;
+      gap: 6px;
+    }
+    .key-bar.open { display: flex; }
+    .key-input {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--gold);
+      background: #0f172a;
+      color: #fff;
+      font-size: 0.85rem;
+      direction: ltr;
     }
     .container {
       max-width: 750px;
@@ -136,47 +155,83 @@
 <header>
   <div class="logo">
     <h1>⚖️ القسطاس الجنائي AI</h1>
-    <p>قانون العقوبات الجزائري • النسخة الرسمية</p>
+    <p>مدعوم بمحرك Gemini • قانون العقوبات الجزائري</p>
   </div>
   <div class="official-links">
-    <a href="https://www.joradp.dz/HAR/Index.htm" target="_blank" class="joradp-btn">📜 الجريدة الرسمية</a>
-    <a href="https://droit.mjustice.gov.dz/ar" target="_blank" class="joradp-btn">🏛️ وزارة العدل</a>
+    <button type="button" class="joradp-btn" onclick="toggleKeyBar()">🔑 المفتاح</button>
+    <a href="https://www.joradp.dz/HAR/Index.htm" target="_blank" class="joradp-btn">📜 الجريدة</a>
+    <a href="https://droit.mjustice.gov.dz/ar" target="_blank" class="joradp-btn">🏛️ العدل</a>
   </div>
 </header>
 
+<div class="key-bar" id="keyBar">
+  <input type="password" id="geminiKeyInput" class="key-input" placeholder="AIzaSy... الصق مفتاح Gemini هنا">
+  <button type="button" class="send-btn" style="padding:0 14px;font-size:0.82rem;" onclick="saveKey()">حفظ</button>
+</div>
+
 <div class="container">
   <div class="quick-prompts">
-    <button type="button" class="prompt-chip" onclick="usePrompt('عقوبة السرقة الموصوفة في قانون العقوبات الجزائري')">عقوبة السرقة الموصوفة</button>
-    <button type="button" class="prompt-chip" onclick="usePrompt('المادة 264 من قانون العقوبات الجزائري')">المادة 264 (الضرب والجرح)</button>
-    <button type="button" class="prompt-chip" onclick="usePrompt('شروط الدفاع المشروع في قانون العقوبات الجزائري')">الدفاع المشروع</button>
-    <button type="button" class="prompt-chip" onclick="usePrompt('عقوبة إصدار شيك بدون رصيد في القانون الجزائري')">شيك بدون رصيد</button>
+    <button type="button" class="prompt-chip" onclick="usePrompt('ما هي عقوبة السرقة الموصوفة في قانون العقوبات الجزائري؟')">عقوبة السرقة الموصوفة</button>
+    <button type="button" class="prompt-chip" onclick="usePrompt('اشرح أحكام المادة 264 من قانون العقوبات الجزائري')">المادة 264 (الضرب والجرح)</button>
+    <button type="button" class="prompt-chip" onclick="usePrompt('ما هي شروط الدفاع المشروع في قانون العقوبات الجزائري؟')">الدفاع المشروع</button>
+    <button type="button" class="prompt-chip" onclick="usePrompt('ما هي عقوبة إصدار شيك بدون رصيد في القانون الجزائري؟')">شيك بدون رصيد</button>
   </div>
 
   <div class="chat-area" id="chatArea">
     <div class="msg bot">
-      مرحباً بك في <b>القسطاس الجنائي AI</b>، مستشارك الذكي المتخصص <b>حصرياً في قانون العقوبات الجزائري</b>.<br>
-      اكتب رقم المادة أو اسم الجريمة وسأقدم لك التحليل القانوني والعقوبة فوراً.
+      مرحباً بك في <b>القسطاس الجنائي AI</b> المدعوم مباشرة بمحرك <b>Google Gemini</b>.<br>
+      للبدء أول مرة: اضغط على زر <b>🔑 المفتاح</b> في الأعلى والصق مفتاح Gemini المجاني الخاص بك، ثم اسأل عن أي مادة أو جريمة في قانون العقوبات الجزائري.
     </div>
   </div>
 
   <div class="ai-input-group">
-    <input type="text" id="userQuestion" class="ai-input" placeholder="اكتب رقم المادة أو الجريمة...">
-    <button type="button" id="sendBtn" class="send-btn" onclick="askAI()">إرسال</button>
+    <input type="text" id="userQuestion" class="ai-input" placeholder="اسأل عن مادة، جريمة، أو عقوبة...">
+    <button type="button" id="sendBtn" class="send-btn" onclick="askGemini()">إرسال</button>
   </div>
 </div>
 
-<script src="https://js.puter.com/v2/" defer></script>
 <script>
+  const SYSTEM_INSTRUCTION = `أنت مستشار قانوني جزائري خبير ومتخصص حصرياً في قانون العقوبات الجزائري (الأمر رقم 66-156 المؤرخ في 8 يونيو 1966، المعدل والمتمم بجميع القوانين السارية المفعول، بما فيها القانون 24-06).
+قواعد صارمة:
+1. أجب فوراً وبشكل مباشر على سؤال المستخدم دون أن تطلب منه إرسال نص المادة أو توضيح السياق.
+2. اذكر رقم المادة المطبقة بدقة، ومضمونها القانوني الحقيقي في قانون العقوبات الجزائري، وأركان الجريمة، والعقوبة المقررة (الحبس أو السجن والغرامة بالدينار الجزائري)، مع التنبيه إن كانت المادة ملغاة أو معدلة.
+3. إذا كان السؤال خارج القانون الجنائي الجزائري، اعتذر باختصار وقل: "عذراً، تخصصي يقتصر على أحكام قانون العقوبات الجزائري فقط."
+4. نظم الإجابة في نقاط واضحة ومباشرة باللغة العربية الفصحى.`;
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('qistas_gemini_key');
+    if (saved) {
+      document.getElementById('geminiKeyInput').value = saved;
+    } else {
+      document.getElementById('keyBar').classList.add('open');
+    }
+  });
+
+  function toggleKeyBar() {
+    document.getElementById('keyBar').classList.toggle('open');
+  }
+
+  function saveKey() {
+    const val = document.getElementById('geminiKeyInput').value.trim();
+    if (!val.startsWith('AIza')) {
+      alert('يرجى إدخال مفتاح Gemini صحيح يبدأ بـ AIza');
+      return;
+    }
+    localStorage.setItem('qistas_gemini_key', val);
+    document.getElementById('keyBar').classList.remove('open');
+    alert('تم حفظ المفتاح بنجاح على هاتفك!');
+  }
+
   document.getElementById('userQuestion').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
       e.preventDefault();
-      askAI();
+      askGemini();
     }
   });
 
   function usePrompt(text) {
     document.getElementById('userQuestion').value = text;
-    askAI();
+    askGemini();
   }
 
   function escapeHTML(str) {
@@ -189,7 +244,14 @@
       .replace(/\n/g, '<br>');
   }
 
-  async function askAI() {
+  async function askGemini() {
+    const apiKey = localStorage.getItem('qistas_gemini_key');
+    if (!apiKey) {
+      document.getElementById('keyBar').classList.add('open');
+      alert('يرجى لصق مفتاح Gemini في الشريط العلوي أولاً والضغط على حفظ.');
+      return;
+    }
+
     const input = document.getElementById('userQuestion');
     const sendBtn = document.getElementById('sendBtn');
     const question = input.value.trim();
@@ -202,20 +264,39 @@
     sendBtn.textContent = '...';
 
     const loadingId = 'load_' + Date.now();
-    chatArea.innerHTML += `<div class="msg bot" id="${loadingId}">⏳ جاري استخراج الحكم القانوني...</div>`;
+    chatArea.innerHTML += `<div class="msg bot" id="${loadingId}">⏳ جاري التحليل القانوني عبر Gemini...</div>`;
     chatArea.scrollTop = chatArea.scrollHeight;
 
     try {
-      const prompt = `أنت أستاذ في القانون الجنائي الجزائري. اشرح مباشرة وبالتفصيل أحكام ومضمون: "${question}" وفق قانون العقوبات الجزائري (الأمر رقم 66-156 المعدل والمتمم).
-ممنوع منعاً باتاً أن تطلب من السائل إرسال نص المادة أو توضيح الطبعة أو طرح أي سؤال عليه؛ قدّم الشرح القانوني والأركان والعقوبة (الحبس/السجن والغرامة بالدينار الجزائري) مباشرة في نقاط منظمة باللغة العربية.`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: {
+            parts: [{ text: SYSTEM_INSTRUCTION }]
+          },
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text: question }]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.1
+          }
+        })
+      });
 
-      const response = await puter.ai.chat(prompt);
-      const replyText = typeof response === 'string'
-        ? response
-        : (response?.message?.content || response?.text || 'لم يتم الحصول على رد.');
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.error?.message || 'خطأ من خادم Google');
+      }
+
+      const replyText = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'لم يتم الحصول على رد.';
       document.getElementById(loadingId).innerHTML = formatMarkdown(replyText);
     } catch (err) {
-      document.getElementById(loadingId).textContent = '⚠️ حدث خطأ مؤقت، اضغط إرسال مرة أخرى.';
+      document.getElementById(loadingId).textContent = '⚠️ خطأ: ' + err.message;
     } finally {
       sendBtn.disabled = false;
       sendBtn.textContent = 'إرسال';
