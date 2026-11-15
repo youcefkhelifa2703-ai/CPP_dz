@@ -167,12 +167,14 @@
 </div>
 
 <script>
-  const SYSTEM_INSTRUCTION = `أنت خبير في القانون الجنائي الجزائري وقانون العقوبات الجزائري (الأمر رقم 66-156 المعدل والمتمم بجميع القوانين السارية المفعول، بما فيها تعديلات 2024 و2025 و2026).
-عندما يسألك المستخدم عن رقم مادة (مثلاً: المادة 66، المادة 50، المادة 264...) أو عن جريمة أو مصطلح جنائي:
-1. أجب فوراً وبشكل مباشر دون أن تطلب من المستخدم إرسال نص المادة أو توضيح السياق.
-2. اذكر موضوع المادة ومضمونها القانوني في قانون العقوبات الجزائري (الأمر 66-156)، وأركانها أو شروط تطبيقها، والعقوبة المقررة لها (الحبس/السجن، الغرامة بالدينار الجزائري، العقوبات التكميلية) أو حالة إلغائها/تعديلها إن كانت ملغاة.
-3. إذا كان السؤال خارج القانون الجنائي الجزائري، اعتذر بلباقة وقل: "عذراً، تخصصي يقتصر على أحكام قانون العقوبات الجزائري فقط."
-4. نظم الإجابة في نقاط واضحة ومباشرة باللغة العربية الفصحى.`;
+  // إلغاء أي Service Worker قديم يمنع التحديث الفوري
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      for (let reg of regs) reg.unregister();
+    });
+  }
+
+  const SYSTEM_INSTRUCTION = `أنت مستشار قانوني جزائري خبير ومتخصص حصرياً في قانون العقوبات الجزائري (الأمر رقم 66-156 المعدل والمتمم). أجب فوراً وبشكل مباشر في نقاط واضحة باللغة العربية الفصحى حول مضمون المادة أو الجريمة وأركانها والعقوبات المقررة بالدينار الجزائري والحبس/السجن، أو حالة إلغائها إن كانت ملغاة. إذا كان السؤال خارج القانون الجنائي الجزائري اعتذر بلباقة.`;
 
   document.getElementById('userQuestion').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
@@ -196,6 +198,19 @@
       .replace(/\n/g, '<br>');
   }
 
+  async function fetchWithTimeout(url, options, timeout = 14000) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+      const response = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(id);
+      return response;
+    } catch (err) {
+      clearTimeout(id);
+      throw err;
+    }
+  }
+
   async function askAI() {
     const input = document.getElementById('userQuestion');
     const sendBtn = document.getElementById('sendBtn');
@@ -209,36 +224,49 @@
     sendBtn.textContent = '...';
 
     const loadingId = 'load_' + Date.now();
-    chatArea.innerHTML += `<div class="msg bot" id="${loadingId}">⏳ جاري تحليل السؤال وفق قانون العقوبات الجزائري...</div>`;
+    chatArea.innerHTML += `<div class="msg bot" id="${loadingId}">⏳ جاري استخراج الحكم القانوني...</div>`;
     chatArea.scrollTop = chatArea.scrollHeight;
 
+    let replyText = '';
+
     try {
-      const response = await fetch('https://text.pollinations.ai/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [
-            { role: 'system', content: SYSTEM_INSTRUCTION },
-            { role: 'user', content: question }
-          ],
-          model: 'openai',
-          seed: Math.floor(Math.random() * 10000)
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('HTTP ' + response.status);
+      // المحاولة 1: مسار GET السريع والمباشر
+      const promptQuery = encodeURIComponent(`${SYSTEM_INSTRUCTION}\n\nالسؤال في قانون العقوبات الجزائري: ${question}`);
+      const res1 = await fetchWithTimeout(`https://text.pollinations.ai/${promptQuery}?model=openai&seed=${Date.now()}`, { method: 'GET' }, 14000);
+      if (res1.ok) {
+        replyText = await res1.text();
       }
-
-      const replyText = await response.text();
-      document.getElementById(loadingId).innerHTML = formatMarkdown(replyText || 'لم يتم استلام رد.');
-    } catch (err) {
-      document.getElementById(loadingId).textContent = '⚠️ تعذر الاتصال بالخادم، تحقق من الإنترنت وأعد المحاولة.';
-    } finally {
-      sendBtn.disabled = false;
-      sendBtn.textContent = 'إرسال';
-      chatArea.scrollTop = chatArea.scrollHeight;
+    } catch (e1) {
+      // المحاولة 2: مسار POST الاحتياطي
+      try {
+        const res2 = await fetchWithTimeout('https://text.pollinations.ai/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: [
+              { role: 'system', content: SYSTEM_INSTRUCTION },
+              { role: 'user', content: question }
+            ],
+            model: 'mistral'
+          })
+        }, 14000);
+        if (res2.ok) {
+          replyText = await res2.text();
+        }
+      } catch (e2) {
+        replyText = '';
+      }
     }
+
+    if (replyText && replyText.trim().length > 5) {
+      document.getElementById(loadingId).innerHTML = formatMarkdown(replyText);
+    } else {
+      document.getElementById(loadingId).innerHTML = '⚠️ الخادم مزدحم حالياً، اضغط <b>إرسال</b> مرة أخرى أو تصفح <a href="https://www.joradp.dz/TRV/APenal.pdf" target="_blank" style="color:#f59e0b;">النص الرسمي المدمج</a>.';
+    }
+
+    sendBtn.disabled = false;
+    sendBtn.textContent = 'إرسال';
+    chatArea.scrollTop = chatArea.scrollHeight;
   }
 </script>
 </body>
