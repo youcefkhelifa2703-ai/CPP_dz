@@ -199,6 +199,7 @@
 4. نظم الإجابة في نقاط واضحة ومباشرة باللغة العربية الفصحى.`;
 
   window.addEventListener('DOMContentLoaded', () => {
+    localStorage.removeItem('qistas_active_model');
     const saved = localStorage.getItem('qistas_gemini_key');
     if (saved) {
       document.getElementById('geminiKeyInput').value = saved;
@@ -255,11 +256,18 @@
       });
       if (res.ok) {
         const data = await res.json();
-        const flashModels = (data.models || [])
-          .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent') && m.name.includes('flash'))
+        const geminiModels = (data.models || [])
+          .filter(m =>
+            m.supportedGenerationMethods &&
+            m.supportedGenerationMethods.includes('generateContent') &&
+            m.name.includes('gemini') &&
+            m.name.includes('flash') &&
+            !m.name.includes('tts') &&
+            !m.name.includes('image')
+          )
           .map(m => m.name.replace('models/', ''));
-        if (flashModels.length > 0) {
-          const chosen = flashModels[flashModels.length - 1];
+        if (geminiModels.length > 0) {
+          const chosen = geminiModels[geminiModels.length - 1];
           localStorage.setItem('qistas_active_model', chosen);
           return chosen;
         }
@@ -299,6 +307,8 @@
     try {
       const activeModel = await detectAvailableModel(apiKey);
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${activeModel}:generateContent`;
+      const fullPrompt = `${SYSTEM_INSTRUCTION}\n\nسؤال المستخدم: ${question}`;
+
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -306,13 +316,10 @@
           'x-goog-api-key': apiKey
         },
         body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: SYSTEM_INSTRUCTION }]
-          },
           contents: [
             {
               role: 'user',
-              parts: [{ text: question }]
+              parts: [{ text: fullPrompt }]
             }
           ],
           generationConfig: {
