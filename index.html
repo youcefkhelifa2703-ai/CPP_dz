@@ -193,4 +193,150 @@
 <script>
   const SYSTEM_INSTRUCTION = `أنت مستشار قانوني جزائري خبير ومتخصص حصرياً في قانون العقوبات الجزائري (الأمر رقم 66-156 المؤرخ في 8 يونيو 1966، المعدل والمتمم بجميع القوانين السارية المفعول، بما فيها القانون 24-06).
 قواعد صارمة:
-1. أجب فو
+1. أجب فوراً وبشكل مباشر على سؤال المستخدم دون أن تطلب منه إرسال نص المادة أو توضيح السياق.
+2. اذكر رقم المادة المطبقة بدقة، ومضمونها القانوني الحقيقي في قانون العقوبات الجزائري، وأركان الجريمة، والعقوبة المقررة (الحبس أو السجن والغرامة بالدينار الجزائري)، مع التنبيه إن كانت المادة ملغاة أو معدلة.
+3. إذا كان السؤال خارج القانون الجنائي الجزائري، اعتذر باختصار وقل: "عذراً، تخصصي يقتصر على أحكام قانون العقوبات الجزائري فقط."
+4. نظم الإجابة في نقاط واضحة ومباشرة باللغة العربية الفصحى.`;
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('qistas_gemini_key');
+    if (saved) {
+      document.getElementById('geminiKeyInput').value = saved;
+    } else {
+      document.getElementById('keyBar').classList.add('open');
+    }
+  });
+
+  function toggleKeyBar() {
+    document.getElementById('keyBar').classList.toggle('open');
+  }
+
+  function saveKey() {
+    const val = document.getElementById('geminiKeyInput').value.trim();
+    if (val.length < 15) {
+      alert('يرجى إدخال مفتاح Gemini صحيح');
+      return;
+    }
+    localStorage.setItem('qistas_gemini_key', val);
+    localStorage.removeItem('qistas_active_model');
+    document.getElementById('keyBar').classList.remove('open');
+    alert('تم حفظ المفتاح بنجاح!');
+  }
+
+  document.getElementById('userQuestion').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      askGemini();
+    }
+  });
+
+  function usePrompt(text) {
+    document.getElementById('userQuestion').value = text;
+    askGemini();
+  }
+
+  function escapeHTML(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function formatMarkdown(text) {
+    return escapeHTML(text)
+      .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+      .replace(/\n/g, '<br>');
+  }
+
+  async function detectAvailableModel(apiKey) {
+    const cached = localStorage.getItem('qistas_active_model');
+    if (cached) return cached;
+
+    try {
+      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models', {
+        headers: { 'x-goog-api-key': apiKey }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const flashModels = (data.models || [])
+          .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent') && m.name.includes('flash'))
+          .map(m => m.name.replace('models/', ''));
+        if (flashModels.length > 0) {
+          const chosen = flashModels[flashModels.length - 1];
+          localStorage.setItem('qistas_active_model', chosen);
+          return chosen;
+        }
+      }
+    } catch (e) {}
+    return 'gemini-3.8-flash';
+  }
+
+  async function askGemini() {
+    const inputVal = document.getElementById('geminiKeyInput').value.trim();
+    if (inputVal.length >= 15) {
+      localStorage.setItem('qistas_gemini_key', inputVal);
+    }
+
+    const apiKey = localStorage.getItem('qistas_gemini_key');
+    if (!apiKey) {
+      document.getElementById('keyBar').classList.add('open');
+      alert('يرجى لصق مفتاح Gemini في الشريط العلوي أولاً والضغط على حفظ.');
+      return;
+    }
+
+    const input = document.getElementById('userQuestion');
+    const sendBtn = document.getElementById('sendBtn');
+    const question = input.value.trim();
+    if (!question) return;
+
+    const chatArea = document.getElementById('chatArea');
+    chatArea.innerHTML += `<div class="msg user">${escapeHTML(question)}</div>`;
+    input.value = '';
+    sendBtn.disabled = true;
+    sendBtn.textContent = '...';
+
+    const loadingId = 'load_' + Date.now();
+    chatArea.innerHTML += `<div class="msg bot" id="${loadingId}">⏳ جاري التحليل القانوني عبر Gemini...</div>`;
+    chatArea.scrollTop = chatArea.scrollHeight;
+
+    try {
+      const activeModel = await detectAvailableModel(apiKey);
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${activeModel}:generateContent`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey
+        },
+        body: JSON.stringify({
+          system_instruction: {
+            parts: [{ text: SYSTEM_INSTRUCTION }]
+          },
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text: question }]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.1
+          }
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        localStorage.removeItem('qistas_active_model');
+        throw new Error(data?.error?.message || 'حدث خطأ أثناء الاتصال بالخادم');
+      }
+
+      const replyText = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'لم يتم الحصول على رد.';
+      document.getElementById(loadingId).innerHTML = formatMarkdown(replyText);
+    } catch (err) {
+      document.getElementById(loadingId).innerHTML = `⚠️ <b>تنبيه:</b> ${escapeHTML(err.message)}`;
+    } finally {
+      sendBtn.disabled = false;
+      sendBtn.textContent = 'إرسال';
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+  }
+</script>
+</body>
+</html>
