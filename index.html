@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>القسطاس الجنائي AI - قانون العقوبات الجزائري</title>
-  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://js.puter.com/v2/"></script>
   <style>
     :root {
       --bg: #0f172a;
@@ -137,137 +137,15 @@
 <header>
   <div class="logo">
     <h1>⚖️ القسطاس الجنائي AI</h1>
-    <p>قانون العقوبات الجزائري • مباشر وبدون قيود</p>
+    <p>قانون العقوبات الجزائري • النسخة الرسمية</p>
   </div>
   <div class="official-links">
-    <a href="https://www.joradp.dz/TRV/APenal.pdf" target="_blank" class="joradp-btn">📜 النص الرسمي</a>
+    <a href="https://www.joradp.dz/TRV/Apenal.pdf" target="_blank" class="joradp-btn">📜 النص الرسمي</a>
     <a href="https://droit.mjustice.gov.dz/ar" target="_blank" class="joradp-btn">🏛️ وزارة العدل</a>
   </div>
 </header>
 
 <div class="container">
   <div class="quick-prompts">
-    <button type="button" class="prompt-chip" onclick="usePrompt('ما هي عقوبة السرقة الموصوفة في قانون العقوبات الجزائري؟')">عقوبة السرقة الموصوفة</button>
-    <button type="button" class="prompt-chip" onclick="usePrompt('اشرح لي أحكام المادة 264 من قانون العقوبات الجزائري')">المادة 264 (الضرب والجرح)</button>
-    <button type="button" class="prompt-chip" onclick="usePrompt('ما هي شروط الدفاع المشروع في قانون العقوبات الجزائري؟')">الدفاع المشروع</button>
-    <button type="button" class="prompt-chip" onclick="usePrompt('ما هي عقوبة إصدار شيك بدون رصيد؟')">شيك بدون رصيد</button>
-  </div>
-
-  <div class="chat-area" id="chatArea">
-    <div class="msg bot">
-      مرحباً بك في <b>القسطاس الجنائي AI</b>، مستشارك الذكي المتخصص <b>حصرياً في قانون العقوبات الجزائري</b>.<br>
-      اطرح سؤالك أو اكتب رقم المادة القانونية، وسيقوم الذكاء الاصطناعي بتحليلها فوراً.
-    </div>
-  </div>
-
-  <div class="ai-input-group">
-    <input type="text" id="userQuestion" class="ai-input" placeholder="اسأل عن مادة، جريمة، أو عقوبة...">
-    <button type="button" id="sendBtn" class="send-btn" onclick="askAI()">إرسال</button>
-  </div>
-</div>
-
-<script>
-  // إلغاء أي Service Worker قديم يمنع التحديث الفوري
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(regs => {
-      for (let reg of regs) reg.unregister();
-    });
-  }
-
-  const SYSTEM_INSTRUCTION = `أنت مستشار قانوني جزائري خبير ومتخصص حصرياً في قانون العقوبات الجزائري (الأمر رقم 66-156 المعدل والمتمم). أجب فوراً وبشكل مباشر في نقاط واضحة باللغة العربية الفصحى حول مضمون المادة أو الجريمة وأركانها والعقوبات المقررة بالدينار الجزائري والحبس/السجن، أو حالة إلغائها إن كانت ملغاة. إذا كان السؤال خارج القانون الجنائي الجزائري اعتذر بلباقة.`;
-
-  document.getElementById('userQuestion').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      askAI();
-    }
-  });
-
-  function usePrompt(text) {
-    document.getElementById('userQuestion').value = text;
-    askAI();
-  }
-
-  function escapeHTML(str) {
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  }
-
-  function formatMarkdown(text) {
-    return escapeHTML(text)
-      .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-      .replace(/\n/g, '<br>');
-  }
-
-  async function fetchWithTimeout(url, options, timeout = 14000) {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeout);
-    try {
-      const response = await fetch(url, { ...options, signal: controller.signal });
-      clearTimeout(id);
-      return response;
-    } catch (err) {
-      clearTimeout(id);
-      throw err;
-    }
-  }
-
-  async function askAI() {
-    const input = document.getElementById('userQuestion');
-    const sendBtn = document.getElementById('sendBtn');
-    const question = input.value.trim();
-    if (!question) return;
-
-    const chatArea = document.getElementById('chatArea');
-    chatArea.innerHTML += `<div class="msg user">${escapeHTML(question)}</div>`;
-    input.value = '';
-    sendBtn.disabled = true;
-    sendBtn.textContent = '...';
-
-    const loadingId = 'load_' + Date.now();
-    chatArea.innerHTML += `<div class="msg bot" id="${loadingId}">⏳ جاري استخراج الحكم القانوني...</div>`;
-    chatArea.scrollTop = chatArea.scrollHeight;
-
-    let replyText = '';
-
-    try {
-      // المحاولة 1: مسار GET السريع والمباشر
-      const promptQuery = encodeURIComponent(`${SYSTEM_INSTRUCTION}\n\nالسؤال في قانون العقوبات الجزائري: ${question}`);
-      const res1 = await fetchWithTimeout(`https://text.pollinations.ai/${promptQuery}?model=openai&seed=${Date.now()}`, { method: 'GET' }, 14000);
-      if (res1.ok) {
-        replyText = await res1.text();
-      }
-    } catch (e1) {
-      // المحاولة 2: مسار POST الاحتياطي
-      try {
-        const res2 = await fetchWithTimeout('https://text.pollinations.ai/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            messages: [
-              { role: 'system', content: SYSTEM_INSTRUCTION },
-              { role: 'user', content: question }
-            ],
-            model: 'mistral'
-          })
-        }, 14000);
-        if (res2.ok) {
-          replyText = await res2.text();
-        }
-      } catch (e2) {
-        replyText = '';
-      }
-    }
-
-    if (replyText && replyText.trim().length > 5) {
-      document.getElementById(loadingId).innerHTML = formatMarkdown(replyText);
-    } else {
-      document.getElementById(loadingId).innerHTML = '⚠️ الخادم مزدحم حالياً، اضغط <b>إرسال</b> مرة أخرى أو تصفح <a href="https://www.joradp.dz/TRV/APenal.pdf" target="_blank" style="color:#f59e0b;">النص الرسمي المدمج</a>.';
-    }
-
-    sendBtn.disabled = false;
-    sendBtn.textContent = 'إرسال';
-    chatArea.scrollTop = chatArea.scrollHeight;
-  }
-</script>
-</body>
-</html>
+    <button type="button" class="prompt-chip" onclick="usePrompt('عقوبة السرقة الموص
+      
