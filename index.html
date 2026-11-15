@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>المستشار الذكي - قانون العقوبات الجزائري AI</title>
+  <title>القسطاس الجنائي AI - قانون العقوبات الجزائري</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -27,7 +27,7 @@
     }
     header {
       background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-      padding: 14px 16px;
+      padding: 12px 16px;
       border-bottom: 2px solid var(--gold);
       display: flex;
       justify-content: space-between;
@@ -35,20 +35,21 @@
       flex-shrink: 0;
     }
     .logo h1 { font-size: 1.05rem; color: var(--gold); font-weight: 800; }
-    .logo p { font-size: 0.74rem; color: var(--muted); }
-    .status-badge {
-      font-size: 0.72rem;
-      padding: 4px 10px;
-      border-radius: 20px;
-      background: rgba(16, 185, 129, 0.15);
-      color: var(--green);
-      border: 1px solid var(--green);
-      font-weight: 700;
+    .logo p { font-size: 0.72rem; color: var(--muted); }
+    .official-links {
+      display: flex;
+      gap: 6px;
     }
-    .status-badge.offline {
-      background: rgba(239, 68, 68, 0.15);
-      color: var(--red);
-      border-color: var(--red);
+    .joradp-btn {
+      font-size: 0.72rem;
+      padding: 5px 10px;
+      border-radius: 10px;
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--gold);
+      border: 1px solid var(--gold);
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
     }
     .container {
       max-width: 750px;
@@ -78,7 +79,6 @@
       font-size: 0.78rem;
       white-space: nowrap;
       cursor: pointer;
-      transition: 0.2s;
     }
     .prompt-chip:hover { border-color: var(--gold); color: var(--gold); }
     .chat-area {
@@ -141,10 +141,13 @@
 
 <header>
   <div class="logo">
-    <h1>⚖️ قانون العقوبات الجزائري AI</h1>
-    <p>مُحيّن تلقائياً وفق الجريدة الرسمية</p>
+    <h1>⚖️ القسطاس الجنائي AI</h1>
+    <p>قانون العقوبات الجزائري • مرتبط بالجريدة الرسمية</p>
   </div>
-  <div id="netStatus" class="status-badge">متصل بالشبكة</div>
+  <div class="official-links">
+    <a href="https://www.joradp.dz/TRV/APenal.pdf" target="_blank" class="joradp-btn">📜 النص الرسمي</a>
+    <a href="https://www.joradp.dz/HAR/Index.htm" target="_blank" class="joradp-btn">🏛️ الجريدة الرسمية</a>
+  </div>
 </header>
 
 <div class="container">
@@ -157,8 +160,8 @@
 
   <div class="chat-area" id="chatArea">
     <div class="msg bot">
-      مرحباً بك. أنا مستشارك القانوني الذكي المتخصص <b>حصرياً في قانون العقوبات الجزائري</b> ومرتبط بالبحث المباشر في آخر التعديلات التشريعية.<br>
-      اطرح سؤالك أو اكتب رقم المادة القانونية وسأوافيك بالنص والعقوبة بدقة.
+      مرحباً بك في <b>القسطاس الجنائي AI</b>، مستشارك الذكي المتخصص في <b>قانون العقوبات الجزائري</b>.<br>
+      اطرح سؤالك أو اكتب رقم المادة القانونية، كما يمكنك تصفح <b>النص الرسمي المدمج</b> أو <b>الجريدة الرسمية (JORADP)</b> مباشرة من الأزرار في الأعلى.
     </div>
   </div>
 
@@ -169,19 +172,6 @@
 </div>
 
 <script>
-  function updateOnlineStatus() {
-    const badge = document.getElementById('netStatus');
-    if (navigator.onLine) {
-      badge.textContent = 'متصل • محدث تلقائياً';
-      badge.classList.remove('offline');
-    } else {
-      badge.textContent = 'غير متصل بالإنترنت';
-      badge.classList.add('offline');
-    }
-  }
-  window.addEventListener('online', updateOnlineStatus);
-  window.addEventListener('offline', updateOnlineStatus);
-
   function usePrompt(text) {
     document.getElementById('userQuestion').value = text;
     askAI();
@@ -195,7 +185,7 @@
 
   async function askAI() {
     if (!navigator.onLine) {
-      alert('يرجى الاتصال بالإنترنت للبحث في النصوص القانونية المحدثة.');
+      alert('يرجى الاتصال بالإنترنت لاستخدام المستشار الذكي.');
       return;
     }
 
@@ -207,7 +197,7 @@
     chatArea.innerHTML += `<div class="msg user">${question}</div>`;
     input.value = '';
     const loadingId = 'load_' + Date.now();
-    chatArea.innerHTML += `<div class="msg bot" id="${loadingId}">⏳ جاري البحث في نصوص قانون العقوبات الجزائري وتحليلها...</div>`;
+    chatArea.innerHTML += `<div class="msg bot" id="${loadingId}">⏳ جاري تحليل السؤال وفق قانون العقوبات الجزائري...</div>`;
     chatArea.scrollTop = chatArea.scrollHeight;
 
     try {
@@ -224,15 +214,6 @@
     }
     chatArea.scrollTop = chatArea.scrollHeight;
   }
-
-  // إلغاء تسجيل Service Worker القديم لإزالة التخزين المؤقت القديم
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(regs => {
-      for (let reg of regs) reg.unregister();
-    });
-  }
-
-  updateOnlineStatus();
 </script>
 </body>
 </html>
