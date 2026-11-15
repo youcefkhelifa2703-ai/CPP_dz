@@ -34,5 +34,142 @@
       flex-shrink: 0;
     }
     .logo h1 { font-size: 1.05rem; color: var(--gold); font-weight: 800; }
-    .
-    
+    .logo p { font-size: 0.72rem; color: var(--muted); }
+    .official-links { display: flex; gap: 6px; }
+    .joradp-btn {
+      font-size: 0.72rem;
+      padding: 5px 10px;
+      border-radius: 10px;
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--gold);
+      border: 1px solid var(--gold);
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .container {
+      max-width: 750px;
+      width: 100%;
+      margin: auto;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+    .quick-prompts {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 8px;
+      flex-shrink: 0;
+    }
+    .quick-prompts::-webkit-scrollbar { display: none; }
+    .prompt-chip {
+      background: var(--card);
+      border: 1px solid #334155;
+      color: #e2e8f0;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .prompt-chip:hover { border-color: var(--gold); color: var(--gold); }
+    .chat-area {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 14px;
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      border: 1px solid #334155;
+    }
+    .msg {
+      padding: 12px 15px;
+      border-radius: 14px;
+      margin-bottom: 12px;
+      font-size: 0.92rem;
+      line-height: 1.75;
+      word-wrap: break-word;
+    }
+    .msg.bot {
+      background: #0f172a;
+      border-right: 3px solid var(--gold);
+      color: #f1f5f9;
+    }
+    .msg.bot b, .msg.bot strong { color: var(--gold); }
+    .msg.user {
+      background: var(--gold);
+      color: #000;
+      font-weight: 700;
+      margin-right: 18%;
+    }
+    .ai-input-group {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .ai-input {
+      flex: 1;
+      padding: 13px 14px;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      background: var(--card);
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+    .ai-input:focus { outline: none; border-color: var(--gold); }
+    .send-btn {
+      padding: 0 20px;
+      border-radius: 12px;
+      border: none;
+      background: var(--gold);
+      color: #000;
+      font-weight: 800;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <h1>⚖️ القسطاس الجنائي AI</h1>
+    <p>قانون العقوبات الجزائري • مباشر وبدون قيود</p>
+  </div>
+  <div class="official-links">
+    <a href="https://www.joradp.dz/TRV/APenal.pdf" target="_blank" class="joradp-btn">📜 النص الرسمي</a>
+    <a href="https://droit.mjustice.gov.dz/ar" target="_blank" class="joradp-btn">🏛️ وزارة العدل</a>
+  </div>
+</header>
+
+<div class="container">
+  <div class="quick-prompts">
+    <button class="prompt-chip" onclick="usePrompt('ما هي عقوبة السرقة الموصوفة في قانون العقوبات الجزائري؟')">عقوبة السرقة الموصوفة</button>
+    <button class="prompt-chip" onclick="usePrompt('اشرح لي أحكام المادة 264 من قانون العقوبات الجزائري')">المادة 264 (الضرب والجرح)</button>
+    <button class="prompt-chip" onclick="usePrompt('ما هي شروط الدفاع المشروع في قانون العقوبات الجزائري؟')">الدفاع المشروع</button>
+    <button class="prompt-chip" onclick="usePrompt('ما هي عقوبة إصدار شيك بدون رصيد؟')">شيك بدون رصيد</button>
+  </div>
+
+  <div class="chat-area" id="chatArea">
+    <div class="msg bot">
+      مرحباً بك في <b>القسطاس الجنائي AI</b>، مستشارك الذكي المتخصص <b>حصرياً في قانون العقوبات الجزائري</b>.<br>
+      اطرح سؤالك أو اكتب رقم المادة القانونية، وسيقوم الذكاء الاصطناعي بتحليلها فوراً دون أي مفاتيح أو قيود.
+    </div>
+  </div>
+
+  <div class="ai-input-group">
+    <input type="text" id="userQuestion" class="ai-input" placeholder="اسأل عن مادة، جريمة، أو عقوبة..." onkeypress="if(event.key==='Enter') askAI()">
+    <button class="send-btn" onclick="askAI()">إرسال</button>
+  </div>
+</div>
+
+<script>
+  const SYSTEM_INSTRUCTION = `أنت خبير في القانون الجنائي الجزائري وقانون العقوبات الجزائري (الأمر رقم 66-156 المعدل والمتمم).
+عندما يسألك المستخدم عن رقم مادة (مثلاً: المادة 66، المادة 50، المادة 264...) أو عن جريمة أو مصطلح جنائي:
+1. أجب فوراً وبشكل مباشر دون أن تطلب من المستخدم إرسال نص المادة أو توضيح السياق.
+2. اذكر موضوع المادة ومضمون
+  
